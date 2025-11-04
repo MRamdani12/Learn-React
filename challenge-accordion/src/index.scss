@@ -1,0 +1,48 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #242424;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.acc-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    gap: 20px;
+    max-width: 60%;
+    margin: 100px auto;
+}
+
+.active {
+    border-top: 5px solid #05d4b2;
+}
+
+.accordion {
+    display: flex;
+    padding: 20px;
+    justify-content: start;
+    align-items: start;
+    background-color: #222;
+    box-shadow: rgba(255, 255, 255, 0.01) 3px 3px 20px;
+    gap: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all ease 0.2s;
+
+    .acc-number {
+        margin-top: 0px;
+        font-size: 1.5rem;
+    }
+
+    .acc-text {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+}
