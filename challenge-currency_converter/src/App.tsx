@@ -1,35 +1,92 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+type frankfurtRatesResponse = {
+    amount: number;
+    base: string;
+    dates: string;
+    rates: Record<string, number>;
+};
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+export default function App() {
+    const [currencies, setCurrencies] = useState<string[]>([]);
+    const [fromCurrencies, setFromCurrencies] = useState("USD");
+    const [toCurrencies, setToCurrencies] = useState("IDR");
+    const [input, setInput] = useState(1);
+    const [convertedCurrencies, setConvertedCurrencies] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    async function fetchJSON<T>(...args: Parameters<typeof fetch>): Promise<T> {
+        const res = await fetch(...args);
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+        return res.json() as Promise<T>;
+    }
+
+    useEffect(() => {
+        async function fetchCurrencies() {
+            const data = await fetchJSON<Record<string, string>>(
+                "https://api.frankfurter.dev/v1/currencies"
+            );
+            setCurrencies(Object.keys(data));
+        }
+        fetchCurrencies();
+    }, []);
+
+    useEffect(() => {
+        async function fetchCurrenciesRate() {
+            setLoading(true);
+
+            const data = await fetchJSON<frankfurtRatesResponse>(
+                `https://api.frankfurter.dev/v1/latest?base=${fromCurrencies}&symbols=${toCurrencies}`
+            );
+
+            const convertedValue = data.rates[toCurrencies] * input;
+            setConvertedCurrencies(convertedValue);
+            setLoading(false);
+        }
+
+        fetchCurrenciesRate();
+    }, [fromCurrencies, input, toCurrencies]);
+
+    return (
+        <div>
+            <label style={{ display: "block" }}>Currency Converter</label>
+            <br />
+            {String(loading)}
+            <input
+                disabled={loading ? loading : false}
+                value={input}
+                onChange={(e) => setInput(Number(e.target.value))}
+                type="text"
+            />
+            <select
+                disabled={loading ? loading : false}
+                value={fromCurrencies}
+                onChange={(e) => setFromCurrencies(e.target.value)}
+            >
+                {currencies.map((cur) => {
+                    return (
+                        <option key={cur} value={cur}>
+                            {cur ? cur : "Loading Currencies..."}
+                        </option>
+                    );
+                })}
+            </select>
+            <select
+                disabled={loading ? loading : false}
+                value={toCurrencies}
+                onChange={(e) => setToCurrencies(e.target.value)}
+            >
+                {currencies.map((cur) => {
+                    return (
+                        <option key={cur} value={cur}>
+                            {cur ? cur : "Loading Currencies..."}
+                        </option>
+                    );
+                })}
+            </select>
+            <p>
+                {convertedCurrencies} {toCurrencies}
+            </p>
+        </div>
+    );
 }
-
-export default App
